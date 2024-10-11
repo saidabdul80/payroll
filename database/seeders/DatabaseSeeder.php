@@ -59,11 +59,8 @@ class DatabaseSeeder extends Seeder
             'password' => '$2y$10$7BMn8WlpLkUB64fCCCVCvuFbqp4dO34dLL/a7MjMdoITz0FOIOZ.G', // passwprd
         ]);
 
-        Employee::factory(14)->create();
-        Metric::factory(5)->create();
-
-        // Create roles
-        $roles = [
+           // Create roles
+           $roles = [
             'admin',
             'employee',
         ];
@@ -74,7 +71,14 @@ class DatabaseSeeder extends Seeder
 
         $knighthood = Role::findByName('admin');
         $root->assignRole($knighthood);
+        $this->call([
+            SalaryStructureSeeder::class,
+            TaxBracketSeeder::class,
+            CraSeeder::class
+        ]);
 
+        Employee::factory(14)->create();
+         
         // Random Assignments
         foreach (Employee::all() as $index => $employee) {
             if ($employee->id != 1) {
@@ -93,11 +97,12 @@ class DatabaseSeeder extends Seeder
                 'end_date' => null,
             ]);
 
-            $currencies = ['USD', 'EGP', 'SAR', 'EUR', 'GBP'];
-            EmployeeSalary::create([
+            $currencies = ['NGN'];
+            $sa = EmployeeSalary::create([
                 'employee_id' => $employee->id,
-                'currency' => $currencies[array_rand($currencies)],
+                'currency' =>'NGN',
                 'salary' => fake()->numberBetween(2000, 8000),
+                'salary_structure_id' => fake()->numberBetween(1,5),
                 'start_date' => now()->format('Y-m-d'),
                 'end_date' => null,
             ]);
@@ -130,6 +135,11 @@ class DatabaseSeeder extends Seeder
                 $startDate = $startDate->addDay();
             }
         }
+        
+        Metric::factory(5)->create();
+
+     
+    
 
         // Assign Managers to branch #1 and department #1
         Manager::create([
@@ -149,61 +159,65 @@ class DatabaseSeeder extends Seeder
         // Generate Random Requests & Calendar Items
         $this->seedRequests();
         $this->seedCalendarItems();
+
+      
     }
 
     private function seedGlobals(): void
     {
         Globals::create([
-            'organization_name' => 'Global Solutions Inc.',
-            'organization_address' => '123 Main Street, Anytown, USA',
+            'organization_name' => 'Federal University of Technology Minna.',
+            'organization_address' => '123 Main Street, Anytown, Nigeria',
             'absence_limit' => 30,
+            'minimum_wage_in_value'=> 30000,
+            'minimum_tax_determination_in_%'=> 1,
             'email' => 'info@globalsolutions.com',
         ]);
     }
     private function seedBranchesDepartmentsPositionsShifts(): void
     {
         Branch::factory()->create([
-            'name' => 'Cairo Branch',
+            'name' => 'Bosso Campus',
         ]);
 
         Branch::factory()->create([
-            'name' => 'NY Branch',
+            'name' => 'GK Campus',
         ]);
 
         Department::create([
-            'name' => 'IT',
+            'name' => 'Bursary',
         ]);
 
         Department::create([
-            'name' => 'HR',
+            'name' => 'Computer Science',
         ]);
 
         Department::create([
-            'name' => 'Sales',
+            'name' => 'Academic Planning Unit',
         ]);
 
         Department::create([
-            'name' => 'Customer Service',
+            'name' => 'Cyber Security',
         ]);
 
         Position::create([
-            'name' => 'CEO',
-            'description' => 'Chief Executive Officer',
+            'name' => 'Registra',
+            'description' => 'Registra',
         ]);
 
         Position::create([
-            'name' => 'Marketing Manager',
-            'description' => 'Responsible for all marketing activities',
+            'name' => 'Bursar',
+            'description' => 'Bursar',
         ]);
 
         Position::create([
-            'name' => 'Graphic Designer',
-            'description' => 'Responsible for all graphic design activities',
+            'name' => 'Senior Lecturer',
+            'description' => 'Senior Lecturer',
         ]);
 
         Position::create([
-            'name' => 'Developer',
-            'description' => 'Responsible for all development activities',
+            'name' => 'Assistant Lecturer',
+            'description' => 'Assistant Lecturer',
         ]);
 
         Shift::create([
@@ -251,10 +265,14 @@ class DatabaseSeeder extends Seeder
     }
     private function generateRandomPayrolls(){
         for ($i = 1; $i <= Employee::count(); $i++) {
-            $employee_id = Employee::find($i)->id;
+            $employee = Employee::find($i);
+            $employee_id = $employee->id;
 
             $p = Payroll::factory()->create([
                 'employee_id' => $employee_id,
+                //'salary_structure_id'=> $employee->salary()[3],
+                'base'=>$employee->salary()[1],
+                'total_payable'=>$employee->salary()[1],
                 "due_date" => Carbon::now()->toDateString(),
             ]);
 

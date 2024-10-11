@@ -38,15 +38,16 @@ Route::group(['middleware' => ['role:admin', 'auth']], function () {
     Route::get('globals', [\App\Http\Controllers\GlobalsController::class, 'index'])->name('globals.index');
     Route::get('globals/edit', [\App\Http\Controllers\GlobalsController::class, 'edit'])->name('globals.edit');
     Route::put('globals/edit', [\App\Http\Controllers\GlobalsController::class, 'update'])->name('globals.update');
-
+    
     // Logs
     Route::get('logs',[\App\Http\Controllers\LogsController::class, 'index'])->name('logs.index');
-
+    
     // Calendar
     Route::get('calendar', [\App\Http\Controllers\CalendarController::class, 'calendarIndex'])->name('calendar.index');
     Route::resource('calendars', \App\Http\Controllers\CalendarController::class);
-
-
+    
+    
+    Route::get('salary_schemes', [\App\Http\Controllers\GlobalsController::class, 'salarySchemes'])->name('salary.scheme');
 });
 
 // Logged

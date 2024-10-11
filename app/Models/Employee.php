@@ -68,7 +68,7 @@ class Employee extends Authenticatable
     public function salary()
     {
         $salary = $this->salaries()->where('end_date', null)->first();
-        return [$salary->currency, $salary->salary, $salary->start_date];
+        return [$salary->currency, $salary->salary, $salary->start_date, $salary->salary_structure_id];
     }
 
     /**************------- Payrolls -------*************/

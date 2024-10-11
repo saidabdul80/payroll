@@ -55,6 +55,7 @@ Class ValidationServices extends Controller {
     public function validateEmployeeUpdateDetails($request, $id)
     {
         //
+       
         return $request->validate([
             'name' => ['required', 'unique:employees,name,'.$id, 'max:50'],
             'email' => ['required','unique:employees,email,'.$id, 'email:strict'],
@@ -62,6 +63,8 @@ Class ValidationServices extends Controller {
             'national_id' => ['required', 'unique:employees,national_id,'.$id],
             'phone' => ['required', 'regex:/(^[\+]??[0-9]{3}?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$)/', 'unique:employees,phone,'.$id],
             'hired_on' => ['nullable', 'date'],
+            'salary_structure_id' => ['nullable'],
+            
             'address' => ['required', 'string', 'max:255'],
             'bank_acc_no' => ['iban', 'nullable'],
             'branch_id' => ['required', 'integer'],
@@ -70,8 +73,8 @@ Class ValidationServices extends Controller {
 
             'shift_id' => ['required', 'integer'],
             'position_id' => ['required', 'integer'],
-            'currency' => ['required'],
-            'salary' => ['required','integer'],
+            'currency' => ['nullable'],
+            'salary' => ['nullable'],
             'role' => ['required', Rule::in($this->roles)],
         ], $this->validationMessages);
     }

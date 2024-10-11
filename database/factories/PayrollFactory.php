@@ -18,12 +18,12 @@ class PayrollFactory extends Factory
     public function definition(): array
     {
         return [
-            "currency" => "EGP",
-            "base" => $this->faker->randomFloat(2, 1000, 10000),
-            "total_deductions" => $this->faker->randomFloat(2, 1000, 10000),
-            "total_additions" => $this->faker->randomFloat(2, 1000, 10000),
+            "currency" => "NGN",
+            //"base" => $this->faker->randomFloat(2, 1000, 10000),
+            //"total_deductions" => $this->faker->randomFloat(2, 1000, 10000),
+           // "total_additions" => $this->faker->randomFloat(2, 1000, 10000),
             "performance_multiplier" => $this->faker->randomFloat(2, 0, 1),
-            "total_payable" => $this->faker->randomFloat(2, 1000, 10000),
+          //  "total_payable" => $this->faker->randomFloat(2, 1000, 10000),
             "due_date" => Carbon::createFromTimestamp(mt_rand(Carbon::now()->subYears(3)->timestamp, Carbon::now()->timestamp))->format('Y-m-d'),
             "is_reviewed" => false,
             "status" => false,

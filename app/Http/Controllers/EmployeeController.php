@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Position;
+use App\Models\SalaryStructure;
 use App\Models\Shift;
 use App\Services\EmployeeServices;
 use App\Services\ValidationServices;
@@ -40,6 +41,7 @@ class EmployeeController extends Controller
         }
 
         return Inertia::render('Employee/Employees', [
+           
             'employees' => Employee::when($request->term, function ($query, $term) {
                 $query->where('normalized_name', 'ILIKE', '%' . normalizeArabic($term) . '%')
                     ->orWhere('email', 'ILIKE', '%' . $term . '%')
@@ -81,6 +83,7 @@ class EmployeeController extends Controller
     public function create(): Response
     {
         return Inertia::render('Employee/EmployeeCreate', [
+            'salarySchemes'=>SalaryStructure::all(),
             'departments' => Department::select(['id', 'name'])->get(),
             'branches' => Branch::select(['id', 'name'])->get(),
             'positions' => Position::select(['id', 'name'])->get(),
@@ -128,6 +131,7 @@ class EmployeeController extends Controller
     public function edit(string $id)
     {
         return Inertia::render('Employee/EmployeeEdit', [
+            'salarySchemes'=>SalaryStructure::all(),
             'employee' => Employee::with("salaries", "roles", 'employeeShifts.shift', 'employeePositions.position')
                 ->leftjoin('departments', 'employees.department_id',
                     '=', 'departments.id')

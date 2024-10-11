@@ -556,18 +556,18 @@ const submit = () => {
                     <h1 class="card-header">{{ __('Grand Total') }}</h1>
                     <div class="mb-2 ">
                         <p class="font-medium inline">{{ __('Formula') }}: </p>
-                        <span> {{ __('(Base Salary * Performance Multiplier) + Additions - Deductions') }} </span>
+                        <span> {{ __('(Base Salary * Performance Multiplier) + Additions - Deductions - Tax') }} </span>
                     </div>
                     <div class="mb-2 ">
                         <p class="font-medium inline">{{ __('Calculation') }}:</p>
-                        <span> ({{ payroll.base }} * {{ form.performance_multiplier }}) + {{ total_additions }} - {{ total_deductions }} </span>
+                        <span> ({{ payroll.base }} * {{ form.performance_multiplier }}) + {{ total_additions }} - {{ total_deductions }} - {{ payroll.tax_amount  }} </span>
                     </div>
                     <HorizontalRule/>
                     <div class="!my-4 text-purple-700 dark:text-purple-500 !border-red-500"><p
-                        class="font-medium inline">{{ __('Grand Total') }}: </p>
+                        class="font-medium inline">{{ __('Gross Pay') }}: </p>
                         <span>
                             {{ payroll.currency + ' ' + (parseFloat(payroll.base) * parseFloat(form.performance_multiplier) +
-                            parseFloat(total_additions) - parseFloat(total_deductions)).toLocaleString() }}
+                            parseFloat(total_additions) - parseFloat(total_deductions)).toLocaleString()  }}
                         </span>
                     </div>
                     <div class="flex justify-end">

@@ -23,6 +23,7 @@ const props = defineProps({
     positions: Object,
     shifts: Object,
     roles: Object,
+    salarySchemes:Array,
 })
 
 const form = useForm({
@@ -41,6 +42,7 @@ const form = useForm({
     salary: '',
     role: '',
     is_remote: false,
+    salary_structure_id:null
 });
 
 const positionForm = useForm({
@@ -134,6 +136,8 @@ const submitShift = () => {
         }
     });
 };
+
+
 
 </script>
 
@@ -557,29 +561,14 @@ const submitShift = () => {
                                 <div>
                                     <InputLabel for="salary" :value="__('Salary')" class="mb-1"/>
                                     <div class="grid grid-cols-6">
-                                        <select id="currency"
-                                                class="fancy-selector-inline-textInput col-span-2 z-10 !mt-0"
-                                                v-model="form.currency">
+                                        <select id="slary"
+                                                class="fancy-selector-inline-textInput !rounded-l-md !rounded-r-md !tw-w-full col-span-2 z-10 !mt-0"
+                                                v-model="form.salary_structure_id">
                                             <option value='' selected>Currency</option>
-                                            <option value="EGP">EGP</option>
-                                            <option value="USD">USD</option>
-                                            <option value="EUR">EUR</option>
-                                            <option value="GBP">GBP</option>
-                                            <option value="CAD">CAD</option>
-                                            <option value="SAR">SAR</option>
-                                            <option value="AED">AED</option>
-                                            <option value="KWD">KWD</option>
+                                            <option v-for="salary in salarySchemes" :key="salary.id"
+                                                    :value="salary.id">{{ salary.scheme }}/{{ salary.step }}
+                                            </option>
                                         </select>
-                                        <TextInput
-                                            id="salary"
-                                            type="number"
-                                            class="inline ltr:rounded-l-none rtl:rounded-r-none col-span-4"
-                                            :class="{'border border-red-500': form.errors.salary}"
-                                            v-model="form.salary"
-                                            required
-                                            autocomplete="off"
-                                            placeholder="10000"
-                                        />
                                     </div>
                                     <InputError class="mt-2" :message="form.errors.currency"/>
                                     <InputError class="mt-2" :message="form.errors.salary"/>

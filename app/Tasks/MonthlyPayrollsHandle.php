@@ -25,7 +25,7 @@ class MonthlyPayrollsHandle
 
             $payroll = Payroll::create([
                 'employee_id' => $employee->id,
-                'currency' => $employee->salary()[0],
+                'currency' =>'NGN',
                 'base' => $employee->salary()[1],
                 'total_payable' => $employee->salary()[1],
                 'performance_multiplier' => 1,

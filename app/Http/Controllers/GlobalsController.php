@@ -42,4 +42,8 @@ class GlobalsController extends Controller
 
         return to_route('globals.index', ['reload' => true]);
     }
+
+    // public function salarySchemes(Request $request){
+    //     return 
+    // }
 }

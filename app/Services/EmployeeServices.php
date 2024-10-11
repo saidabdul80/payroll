@@ -33,12 +33,11 @@ class EmployeeServices
             'is_remote' => $res['is_remote'],
             'password' => $res['password'],
         ]);
-
+        
         // Salary Registration
         EmployeeSalary::create([
             'employee_id' => $emp['id'],
-            'currency' => $res['currency'],
-            'salary' => $res['salary'],
+            'salary_structure_id'=> intval($res['salary_structure_id']),
             'start_date' => Carbon::createFromFormat('Y-m-d', $res['hired_on'])->addMonth()->startOfMonth(),
             'end_date' => null,
         ]);
@@ -127,8 +126,7 @@ class EmployeeServices
             ]);
             $employee->salaries()->create([
                 'employee_id' => $employee->id,
-                'currency' => $res['currency'],
-                'salary' => $res['salary'],
+                'salary_structure_id'=> intval($res['salary_structure_id']),
                 'start_date' => Carbon::now()->format('Y-m-d'),
                 'end_date' => null,
             ]);

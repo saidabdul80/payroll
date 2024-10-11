@@ -20,7 +20,8 @@ export default {
                 sans: ['Noto Sans Arabic', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                "vtd-primary": colors.sky, // Light mode Datepicker color
+                "vtd-primary": colors.orange, // Light mode Datepicker color
+                "purple": colors.orange, // Light mode Datepicker color
                 "vtd-secondary": colors.gray, // Dark mode Datepicker color
             },
         },
