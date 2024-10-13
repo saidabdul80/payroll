@@ -306,21 +306,9 @@ Class ValidationServices extends Controller {
             'quick_pay' => ['required','boolean'],
             'quick_pay_send_email' => ['required','boolean'],
 
-            // Additions
-            'rewards' => ['nullable','numeric', 'min:0'],
-            'incentives' => ['nullable','numeric', 'min:0'],
-            'reimbursements' => ['nullable','numeric', 'min:0'],
-            'shift_differentials' => ['nullable','numeric', 'min:0'],
-            'commissions' => ['nullable','numeric', 'min:0'],
-            'extra_hour_rate' => ['nullable','numeric', 'min:0'],
-
-            // Deductions
-            'social_security_contributions' => ['nullable','numeric', 'min:0'],
-            'health_insurance' => ['nullable','numeric', 'min:0'],
-            'retirement_plan' => ['nullable','numeric', 'min:0'],
-            'benefits' => ['nullable','numeric', 'min:0'],
-            'union_fees' => ['nullable','numeric', 'min:0'],
-            'negative_hour_rate' => ['nullable','numeric', 'min:0'],
+        
+            'additions' => ['nullable','array'],
+            'deductions' => ['nullable','array'],
 
             // Metric Multiplier
             'metricsIDs' => ['required','array'],

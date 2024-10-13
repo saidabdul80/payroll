@@ -34,6 +34,52 @@ class PayrollServices
         }
         return to_route('payrolls.show', ['payroll' => $payroll]);
     }
+
+    public function updatePayrollAdditionsAndDeductions($payroll, $request)
+{
+    // Extract additions and deductions from the request
+    $additionsRequest = $request['additions'];
+    $deductionsRequest = $request['deductions'];
+
+    // Update or create additions
+    foreach ($additionsRequest as $addition) {
+        $payroll->additions()->updateOrCreate(
+            ['id' => $addition['id'] ?? null], // Update if 'id' is present, else create new
+            [  
+                "payroll_id" => $payroll->id,
+                "addition" => $addition['addition'],
+                "type" => $addition['type'],
+                "amount" => $addition['amount'],
+            ]
+        );
+    }
+
+    // Update or create deductions
+    foreach ($deductionsRequest as $deduction) {
+       
+        $payroll->deductions()->updateOrCreate(
+            ['id' => $deduction['id'] ?? null], // Update if 'id' is present, else create new
+            [  
+                "payroll_id" => $payroll->id,
+                "deduction" => $deduction['deduction'],
+                "type" => $deduction['type'],
+                "amount" => $deduction['amount'],
+            ]
+        );
+    }
+
+    // Get current additions and deductions IDs from the request
+    $currentAdditionIds = collect($additionsRequest)->pluck('id')->filter()->toArray();
+    $currentDeductionIds = collect($deductionsRequest)->pluck('id')->filter()->toArray();
+
+    // Delete additions that are not in the current request
+    $payroll->additions()->whereNotIn('id', $currentAdditionIds)->delete();
+
+    // Delete deductions that are not in the current request
+    $payroll->deductions()->whereNotIn('id', $currentDeductionIds)->delete();
+}
+
+
     public function updatePayroll($res, $id)
     {
         $payroll = Payroll::findOrFail($id);
@@ -42,35 +88,36 @@ class PayrollServices
             return $this->quickPay($payroll, $res);
         }
 
-        $shiftDifferentials = ($payroll->employee->activeShift()->shift_payment_multiplier - 1) * $payroll->base;
-        $hours = $payroll->employee->monthHours(Carbon::parse($payroll->due_date)->subMonthNoOverflow()->year,
-            Carbon::parse($payroll->due_date)->subMonthNoOverflow()->month);
-        $overtime = $hours['hoursDifference'] > 0 ? $hours['hoursDifference'] * $res['extra_hour_rate'] : 0;
-        $undertime = $hours['hoursDifference'] < 0 ? $hours['hoursDifference'] * $res['negative_hour_rate'] * -1 : 0; // * -1 to get +ve value, as hoursDifference is -ve
-        $income_tax = (Globals::first()->income_tax / 100) * $payroll->base;
+        // $shiftDifferentials = ($payroll->employee->activeShift()->shift_payment_multiplier - 1) * $payroll->base;
+        // $hours = $payroll->employee->monthHours(Carbon::parse($payroll->due_date)->subMonthNoOverflow()->year,
+        //     Carbon::parse($payroll->due_date)->subMonthNoOverflow()->month);
+        // $overtime = $hours['hoursDifference'] > 0 ? $hours['hoursDifference'] * $res['extra_hour_rate'] : 0;
+        // $undertime = $hours['hoursDifference'] < 0 ? $hours['hoursDifference'] * $res['negative_hour_rate'] * -1 : 0; // * -1 to get +ve value, as hoursDifference is -ve
+        // $income_tax = (Globals::first()->income_tax / 100) * $payroll->base;
 
-        $payroll->additions->update([
-            'rewards' => $res['rewards'],
-            'incentives' => $res['incentives'],
-            'reimbursements' => $res['reimbursements'],
-            'shift_differentials' => $shiftDifferentials,
-            'commissions' => $res['commissions'],
-            'overtime' => $overtime,
-            'extra_hour_rate' => $res['extra_hour_rate'],
-            'status' => true,
-        ]);
+        $this->updatePayrollAdditionsAndDeductions($payroll, $res);
+        // $payroll->additions->update([
+        //     'rewards' => $res['rewards'],
+        //     'incentives' => $res['incentives'],
+        //     'reimbursements' => $res['reimbursements'],
+        //     'shift_differentials' => $shiftDifferentials,
+        //     'commissions' => $res['commissions'],
+        //     'overtime' => $overtime,
+        //     'extra_hour_rate' => $res['extra_hour_rate'],
+        //     'status' => true,
+        // ]);
 
-        $payroll->deductions->update([
-            'income_tax' => $income_tax,
-            'social_security_contributions' => $res['social_security_contributions'],
-            'health_insurance' => $res['health_insurance'],
-            'retirement_plan' => $res['retirement_plan'],
-            'benefits' => $res['benefits'],
-            'union_fees' => $res['union_fees'],
-            'undertime' => $undertime,
-            'negative_hour_rate' => $res['negative_hour_rate'],
-            'status' => true,
-        ]);
+        // $payroll->deductions->update([
+        //     'income_tax' => $income_tax,
+        //     'social_security_contributions' => $res['social_security_contributions'],
+        //     'health_insurance' => $res['health_insurance'],
+        //     'retirement_plan' => $res['retirement_plan'],
+        //     'benefits' => $res['benefits'],
+        //     'union_fees' => $res['union_fees'],
+        //     'undertime' => $undertime,
+        //     'negative_hour_rate' => $res['negative_hour_rate'],
+        //     'status' => true,
+        // ]);
 
         for ($i = 0; $i < count($payroll->evaluations); $i++) {
             $ev = $payroll->evaluations[$i];
@@ -87,23 +134,13 @@ class PayrollServices
         }
 
     
-    //             $salary = $this->employee->salaries()->where('end_date', null)->first();
-    //             $salary = 0;
-    //             if(!empty($salary->salary) ){
-    //                 $salary = $salary?->salary;
-    //             }
-              
-    //             $additions = $this->additions->getSum(); // Adjust if different method is used to get the sum
-    //             $deductions = $this->deductions->getSum(); // Adjust if different method is used to get the sum
-
-    //             $taxableIncome = ($salary + $additions) - $deductions;
-    //             $taxAmount = self::getTaxAmount((float) $taxableIncome);
-        $taxableIncome = $payroll->base * $res['performance_multiplier'] + $payroll->additions->getSum() - $payroll->deductions->getSum();
+    
+        $taxableIncome = $payroll->base * $res['performance_multiplier'] + $payroll->calculateTotalAdditions() - $payroll->calculateTotalDeductions();
         $taxAmount = Payroll::getTaxAmount((float) $taxableIncome);
         $payroll->update([
             'performance_multiplier' => $res['performance_multiplier'],
-            'total_deductions' => $payroll->deductions->getSum(),
-            'total_additions' => $payroll->additions->getSum(),
+            'total_deductions' => $payroll->calculateTotalAdditions(),
+            'total_additions' => $payroll->calculateTotalDeductions(),
             'total_payable' => $taxableIncome - $taxAmount,
             'tax_amount' =>$taxAmount,
             'is_reviewed' => true,

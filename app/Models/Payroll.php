@@ -78,31 +78,6 @@ class Payroll extends Model
     }
     
 
-    // protected function totalPayable(): Attribute
-    // {
-    //     return Attribute::make(
-    //         get: function ($value) {
-    //             // Assuming these methods exist and return the correct values
-    //             if(empty($employee)){
-    //                 return 0;
-    //             }
-    //             $salary = $this->employee->salaries()->where('end_date', null)->first();
-    //             $salary = 0;
-    //             if(!empty($salary->salary) ){
-    //                 $salary = $salary?->salary;
-    //             }
-              
-    //             $additions = $this->additions->getSum(); // Adjust if different method is used to get the sum
-    //             $deductions = $this->deductions->getSum(); // Adjust if different method is used to get the sum
-
-    //             $taxableIncome = ($salary + $additions) - $deductions;
-    //             $taxAmount = self::getTaxAmount((float) $taxableIncome);
-
-    //             return $salary - $taxAmount;
-    //         },
-    //     );
-    // }
-
 
     public function evaluations(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
