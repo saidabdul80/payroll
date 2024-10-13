@@ -13,8 +13,7 @@ class Payroll extends Model
 {
     use HasFactory, LogsActivity, Tax;
     protected $guarded = [];
-    protected $with =['employee','additions',
-    'deductions'];
+    protected $with =['employee','additions', 'deductions'];
     protected $appends = ['tax_amount'];
 
     public function getActivitylogOptions(): LogOptions
@@ -27,20 +26,57 @@ class Payroll extends Model
         return $this->belongsTo(Employee::class);
     }
 
-    public function additions(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function additions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasOne(Addition::class);
+        return $this->hasMany(Addition::class);
     }
-    public function deductions(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function deductions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasOne(Deduction::class);
+        return $this->hasMany(Deduction::class);
     }
 
-    public function getTaxAmountAttribute(){
-        $taxableIncome = ($this->base + $this->additions->getSum()) - $this->deductions->getSum();
+    public function calculateTotalAdditions()
+    {
+        return $this->additions->reduce(function ($carry, $addition) {
+            if ($addition->type === 'flat') {
+                $addition->total = $addition->amount;
+            } else {
+                $addition->total = ($addition->amount / 100) * $this->payroll->base; // Ensure payroll is accessible
+            }
+            
+            return $carry + $addition->total; // Accumulate the total
+        }, 0); // Initialize accumulator to 0
+    }
+
+    public function calculateTotalDeductions()
+    {
+        return $this->deductions->reduce(function ($carry, $deduction) {
+            if ($deduction->type === 'flat') {
+                $deduction->total = $deduction->amount;
+            } else {
+                $deduction->total = ($deduction->amount / 100) * $this->payroll->base; // Ensure payroll is accessible
+            }
+            
+            return $carry + $deduction->total; // Accumulate the total
+        }, 0); // Initialize accumulator to 0
+    }
+
+    
+    public function getTaxAmountAttribute()
+    {
+        // Calculate total additions using the defined method
+        $totalAdditions = $this->calculateTotalAdditions();
+    
+        // Calculate total deductions using the defined method
+        $totalDeductions = $this->calculateTotalDeductions();
+    
+        // Compute taxable income
+        $taxableIncome = ($this->base + $totalAdditions) - $totalDeductions;
+    
+        // Return the calculated tax amount
         return self::getTaxAmount((float) $taxableIncome);
     }
-
+    
 
     // protected function totalPayable(): Attribute
     // {

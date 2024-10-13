@@ -33,12 +33,8 @@ const props = defineProps({
     shift_modifier: Number,
     performance_multiplier: Number,
     metrics: Object,
-    additionTypes:Array,
-    deductionTypes:Array,
 });
 
-const additionkey = ref(0);
-const deductionkey = ref(0);
 const form = useForm({
 
     // Quick Pay
@@ -85,29 +81,25 @@ const recommended_multiplier = computed(() => {
 });
 
 const total_additions = computed(() => {
-   
-    const total = form.additions.reduce((p, addition) => {
+    return form.additions.value.reduce((p, addition) => {
             if (addition.type === 'flat') {
                 addition.total = addition.amount;
             } else {
                 addition.total = (addition.amount / 100) * payroll.base; // Use payroll.base directly
             }
-            return p + parseFloat(addition.total); // Accumulate the total
-        }, 0)
-        return parseFloat(total).toFixed(2);
+            return p + addition.total; // Accumulate the total
+        }, 0).toFixed(2);
 });
 
 const total_deductions = computed(() => {
-    const total = form.deductions.reduce((p, deduction) => {
-        let val = 0;
-        if (deduction.type === 'flat') {
-            val = deduction.amount;
+    return form.deductions.value.reduce((p, deduction) => {
+            if (deduction.type === 'flat') {
+                deduction.total = deduction.amount;
             } else {
-               val = (deduction.amount / 100) * payroll.base; // Use payroll.base directly
+                deduction.total = (deduction.amount / 100) * payroll.base; // Use payroll.base directly
             }
-            return p + parseFloat(val); // Accumulate the total
-        }, 0)
-        return parseFloat(total).toFixed(2);
+            return p + deduction.total; // Accumulate the total
+        }, 0).toFixed(2);
 });
 
 onMounted(() => {
@@ -147,23 +139,19 @@ const submit = () => {
 
 
     const addAddition =() => {
-        form.additions.push({ addition: '', amount: 0, type: 'flat' });
-        additionkey.value++
+        form.additions.value.push({ addition: '', amount: 0, type: 'flat' });
     }
     const removeAddition = (index)=> {
-        form.additions.splice(index, 1);
-        additionkey.value++
-      // calculateTotalAdditions();
+        form.additions.value.splice(index, 1);
+        calculateTotalAdditions();
     }
     const addDeduction = () =>{
-        form.deductions.push({ deduction: '', amount: 0, type: 'flat' });
-        deductionkey.value++
+        form.deductions.value.push({ deduction: '', amount: 0, type: 'flat' });
     }
 
     const removeDeduction = (index)=> {
-        form.deductions.splice(index, 1);
-        deductionkey.value++
-        //calculateTotalDeductions();
+        form.deductions.value.splice(index, 1);
+        calculateTotalDeductions();
     }
 
     const calculateTotalAdditions = () => {
@@ -294,28 +282,19 @@ const submit = () => {
                                 {{ __('The following values are calculated based on the base salary value and currency.')}}
                             </ToolTip>
                         </h1>
-                        <InvoiceTable :key="additionkey">
+                        <InvoiceTable>
                             <template #Head>
                                 <InvoiceTableHead>{{ __('Criteria') }}</InvoiceTableHead>
-                                <InvoiceTableHead>{{ __('Amount/Percentage') }}</InvoiceTableHead>
-                                <InvoiceTableHead>{{ __('Type') }}</InvoiceTableHead>
+                                <InvoiceTableHead>{{ __('Amount') }}</InvoiceTableHead>
+                                <InvoiceTableHead>{{ __('Calculation') }}</InvoiceTableHead>
                                 <InvoiceTableHead>{{ __('Total') }}</InvoiceTableHead>
                                 <InvoiceTableHead>{{ __('Actions') }}</InvoiceTableHead>
                             </template>
 
                             <template #Body>
-                                <TableRow v-for="(addition, index) in form.additions" >
+                                <TableRow v-for="(addition, index) in additions" :key="index">
                                     <TableBodyHeader>
-                                        
-                                        <!-- <TextInput v-model="addition.addition" placeholder="" /> -->
-                                        <select id="addi"
-                                                class="fancy-selector-inline-textInput !border !rounded-l-md !rounded-r-md !tw-w-full "
-                                                v-model="addition.addition">
-                                            <option value='' selected>Currency</option>
-                                            <option v-for="ad in additionTypes" :key="ad"
-                                                    :value="ad">{{ ad?.replace('_', ' ') }}
-                                            </option>
-                                        </select>
+                                        <TextInput v-model="addition.criteria" placeholder="{{ __('Enter Criteria') }}" />
                                     </TableBodyHeader>
                                     <TableBody>
                                         <TextInput
@@ -325,23 +304,11 @@ const submit = () => {
                                             placeholder="0"
                                             @input="calculateTotalAdditions"
                                         />
-                                        <span v-if="addition.type=='percentage'">%</span>
                                     </TableBody>
                                     <TableBody>
-                                        <select class="fancy-selector-inline-textInput !border !rounded-l-md !rounded-r-md !tw-w-full "
-                                                v-model="addition.type">
-                                            <option value='percentage' selected>Percentage</option>
-                                            <option value='flat' selected>flat</option>
-                                        </select>
-                                        </TableBody>
-                                    <TableBody >
-                                        <span v-if="addition.type=='flat'">
-                                            <TextInput :value="addition.amount" disabled class="bg-gray-100" />
-                                        </span>
-                                        <span v-else>
-                                            <TextInput :value="parseFloat((addition.amount/100) * payroll.base).toFixed(2)" disabled class="bg-gray-100" />
-                                        </span>
+                                        {{ addition.amount }} * {{ payroll.base }}
                                     </TableBody>
+                                    <TableBody>{{ addition.total }}</TableBody>
                                     <TableBody>
                                         <button @click="removeAddition(index)">Remove</button>
                                     </TableBody>
@@ -450,24 +417,16 @@ const submit = () => {
                         <InvoiceTable>
                             <template #Head>
                                 <InvoiceTableHead>{{ __('Criteria') }}</InvoiceTableHead>
-                                <InvoiceTableHead>{{ __('Amount/Percentage') }}</InvoiceTableHead>
-                                <InvoiceTableHead>{{ __('Type') }}</InvoiceTableHead>
+                                <InvoiceTableHead>{{ __('Amount') }}</InvoiceTableHead>
+                                <InvoiceTableHead>{{ __('Calculation') }}</InvoiceTableHead>
                                 <InvoiceTableHead>{{ __('Total') }}</InvoiceTableHead>
                                 <InvoiceTableHead>{{ __('Actions') }}</InvoiceTableHead>
                             </template>
 
                             <template #Body>
-                                <TableRow v-for="(deduction, index) in form.deductions" :key="index">
+                                <TableRow v-for="(deduction, index) in deductions" :key="index">
                                     <TableBodyHeader>
-                                        <!-- <TextInput v-model="deduction.deduction" placeholder="" /> -->
-                                        <select id="addi"
-                                                class="fancy-selector-inline-textInput !border !rounded-l-md !rounded-r-md !tw-w-full "
-                                                v-model="deduction.deduction">
-                                            <option value='' selected>Currency</option>
-                                            <option v-for="ad in deductionTypes" :key="ad"
-                                                    :value="ad">{{ ad?.replace('_', ' ') }}
-                                            </option>
-                                        </select>
+                                        <TextInput v-model="deduction.criteria" placeholder="{{ __('Enter Criteria') }}" />
                                     </TableBodyHeader>
                                     <TableBody>
                                         <TextInput
@@ -477,23 +436,11 @@ const submit = () => {
                                             placeholder="0"
                                             @input="calculateTotalDeductions"
                                         />
-                                        <span v-if="deduction.type=='percentage'">%</span>
                                     </TableBody>
                                     <TableBody>
-                                        <select class="fancy-selector-inline-textInput !border !rounded-l-md !rounded-r-md !tw-w-full"
-                                                v-model="deduction.type">
-                                            <option value='percentage' selected>Percentage</option>
-                                            <option value='flat' selected>flat</option>
-                                        </select>
+                                        {{ deduction.amount }} * {{ payroll.base }}
                                     </TableBody>
-                                    <TableBody >
-                                        <span v-if="deduction.type=='flat'">
-                                            <TextInput :value="deduction.amount" disabled class="bg-gray-100" />
-                                        </span>
-                                        <span v-else>
-                                            <TextInput :value="parseFloat((deduction.amount/100) * payroll.base).toFixed(2)" disabled class="bg-gray-100" />
-                                        </span>
-                                    </TableBody>
+                                    <TableBody>{{ deduction.total }}</TableBody>
                                     <TableBody>
                                         <button @click="removeDeduction(index)">Remove</button>
                                     </TableBody>

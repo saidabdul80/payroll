@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AdditionType;
+use App\Enums\DeductionType;
 use App\Models\Globals;
 use App\Models\Metric;
 use App\Models\Payroll;
@@ -107,6 +109,8 @@ class PayrollController extends Controller
             'shift_modifier' => $payroll->employee->activeShift()->shift_payment_multiplier,
             'hours' => $payroll->employee->monthHours($payrollDate->year, $payrollDate->month),
             'metrics' => Metric::where('created_at', '<=', $payroll->created_at)->get(),
+            'additionTypes' => array_keys(AdditionType::toArray()),
+            'deductionTypes' =>  array_keys(DeductionType::toArray()),
         ]);
     }
 

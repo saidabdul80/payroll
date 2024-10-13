@@ -25,7 +25,7 @@ Route::group(['middleware' => ['role:admin', 'auth']], function () {
     Route::resource('shifts', \App\Http\Controllers\ShiftController::class);
     Route::resource('metrics', \App\Http\Controllers\MetricsController::class);
     Route::resource('requests', \App\Http\Controllers\RequestController::class);
-
+    Route::resource('accounts', \App\Http\Controllers\RequestController::class);
     // Payroll
     Route::put('payrolls/{id}/updateStatus', [\App\Http\Controllers\PayrollController::class, 'updateStatus'])->name('payrolls.updateStatus');
     Route::resource('payrolls', \App\Http\Controllers\PayrollController::class);

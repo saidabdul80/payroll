@@ -60,7 +60,10 @@ function changeLanguage(locale){
                                  :active-links="['dashboard.index']">
                     <RocketIcon class="text-gray-500 dark:text-gray-100"/>
                 </SidebarListItem>
-
+                <SidebarListItem :item-name="__('Account')" :hasBadge="false" link="accounts.index"
+                                 :active-links="['accounts.index','accounts.transactions']">
+                    <MoneyIcon class="text-gray-500 dark:text-gray-100"/>
+                </SidebarListItem>
                 <SidebarListItem :item-name="__('Employees')" :hasBadge="true" badge="number"
                                  :badge-content="$page.props.ui.empCount.toString() ?? '?'"
                                  link="employees.index"
