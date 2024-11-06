@@ -17,7 +17,7 @@ import Card from "@/Components/Card.vue";
 
 const props = defineProps({
     payrolls: Object,
-    dateParam: String,
+    dateParam: Object,
     statusParam: String,
 });
 
@@ -65,6 +65,7 @@ watch(status, filter);
                                 :dark="inject('isDark').value"
                                 required
                             ></VueDatePicker>
+
                             <InputError v-if="Object.keys($page.props.errors).length" class="mt-2" :message="$page.props.errors"/>
                         </div>
 

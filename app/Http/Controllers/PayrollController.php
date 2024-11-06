@@ -10,6 +10,7 @@ use App\Models\Payroll;
 use App\Services\CommonServices;
 use App\Services\PayrollServices;
 use App\Services\ValidationServices;
+use App\Tasks\MonthlyPayrollsHandle;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,6 +30,21 @@ class PayrollController extends Controller
      */
     public function index(Request $request)
     {
+      
+        $data = $this->payrolls($request);
+        if($data['payrolls']->count() == 0){
+           $task =  new MonthlyPayrollsHandle();
+           $task(Carbon::parse($data['date'])->addMonth()->format('Y-m-d'));
+           $data = $this->payrolls($request);
+        }
+        return Inertia::render('Payroll/Payrolls', [
+            'payrolls' => $data['payrolls'],
+            "dateParam" => $data['date'],
+            "statusParam" => $data['status'],
+        ]);
+    }
+
+    private function payrolls($request){
         $this->validationServices->validatePayrollIndexParams($request);
 
         // Setting up filters, if any.
@@ -49,13 +65,14 @@ class PayrollController extends Controller
         $payrolls = Payroll::leftJoin('employees', 'payrolls.employee_id', '=', 'employees.id')
             ->select('payrolls.id', 'due_date', 'currency', 'total_payable', 'employees.name as employee_name', 'status', 'is_reviewed')
             ->orderBy('id');
-
+       
         // Limit to logged-in employee if not admin
         if (!isAdmin())
             $payrolls->where('payrolls.employee_id', auth()->user()->id);
 
         // Date Filter
         if ($date)
+
             $payrolls->whereYear('due_date', $request->date['year'])->whereMonth('due_date', $request->date['month'] + 1);
 
         // Status Filter
@@ -67,13 +84,8 @@ class PayrollController extends Controller
             $payrolls->where('status', true);
         }
 
-        return Inertia::render('Payroll/Payrolls', [
-            'payrolls' => $payrolls->paginate(config('constants.data.pagination_count')),
-            "dateParam" => $date,
-            "statusParam" => $statusParam,
-        ]);
+        return ['payrolls'=>$payrolls->paginate(config('constants.data.pagination_count'))->appends(['date' => $dateParam, 'status' => $statusParam]),'date'=>$dateParam, 'status'=>$statusParam];
     }
-
     /**
      * Display the specified resource.
      */

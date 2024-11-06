@@ -311,9 +311,9 @@ const submit = () => {
                                         <select id="addi"
                                                 class="fancy-selector-inline-textInput !border !rounded-l-md !rounded-r-md !tw-w-full "
                                                 v-model="addition.addition">
-                                            <option value='' selected>Currency</option>
+                                            <option value='' selected>-</option>
                                             <option v-for="ad in additionTypes" :key="ad"
-                                                    :value="ad">{{ ad?.replace('_', ' ') }}
+                                                    :value="ad">{{ ad?.replaceAll('_', ' ') }}
                                             </option>
                                         </select>
                                     </TableBodyHeader>
@@ -465,7 +465,7 @@ const submit = () => {
                                                 v-model="deduction.deduction">
                                             <option value='' selected>Currency</option>
                                             <option v-for="ad in deductionTypes" :key="ad"
-                                                    :value="ad">{{ ad?.replace('_', ' ') }}
+                                                    :value="ad">{{ ad?.replaceAll('_', ' ') }}
                                             </option>
                                         </select>
                                     </TableBodyHeader>
@@ -598,7 +598,7 @@ const submit = () => {
                             </template>
                         </InvoiceTable> -->
                     </Card>
-                    <Card>
+                    <!-- <Card>
                         <h1 class="card-header !mb-6">{{ __('Employee Evaluation') }}
                             <ToolTip>
                                 {{ __('The following matrix will be used to determine the performance multiplier.') }}
@@ -691,7 +691,7 @@ const submit = () => {
                             <p class="text-xs mt-1">{{ __('Weighted Points') }}: {{ recommended_multiplier }}</p>
                         </div>
 
-                    </Card>
+                    </Card> -->
                     <Card>
                         <h1 class="card-header !mb-6">{{ __('Performance Multiplier') }}
                             <ToolTip>
